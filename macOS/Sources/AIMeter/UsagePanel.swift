@@ -79,9 +79,7 @@ private struct WindowRow: View {
             }
             .font(.callout)
 
-            ProgressView(value: min(max(window.percent, 0), 100), total: 100)
-                .tint(tint)
-                .accessibilityHidden(true)
+            MeterBar(fraction: window.percent / 100, tint: tint)
 
             if let resetsAt = window.resetsAt {
                 Text("Resets \(resetsAt, format: .relative(presentation: .named))")
@@ -99,6 +97,27 @@ private struct WindowRow: View {
         case 70..<90: .orange
         default: .accentColor
         }
+    }
+}
+
+/// A capsule meter, drawn in SwiftUI rather than with `ProgressView` so the orange and
+/// red warning colors don't depend on how AppKit's bar treats `.tint`.
+private struct MeterBar: View {
+    let fraction: Double
+    let tint: Color
+
+    var body: some View {
+        GeometryReader { proxy in
+            Capsule()
+                .fill(.quaternary)
+                .overlay(alignment: .leading) {
+                    Capsule()
+                        .fill(tint)
+                        .frame(width: max(proxy.size.width * min(max(fraction, 0), 1), fraction > 0 ? 6 : 0))
+                }
+        }
+        .frame(height: 6)
+        .accessibilityHidden(true)
     }
 }
 

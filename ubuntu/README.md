@@ -4,6 +4,12 @@ A top bar indicator that shows Claude and Codex plan usage at a glance
 (`C 8%  X 21%`, percent **used** of each provider's tightest limit). Click it
 to see every limit and when it resets.
 
+![AI Meter menu with the Yaru theme](docs/menu-light.png)
+![AI Meter menu with the Yaru dark theme](docs/menu-dark.png)
+
+These show the menu drawn by GTK with Ubuntu's Yaru themes. In the top bar, GNOME
+Shell draws the same items in its own menu style.
+
 ```sh
 ./install.sh              # installs to ~/.local/share/ai-meter and starts it
 ./install.sh --autostart  # same, and starts it at login

@@ -4,6 +4,10 @@ A menu bar app that shows Claude and Codex plan usage at a glance (`C 8%  X 0%`)
 The label shows each provider's tightest window; click it to see every window,
 when it resets, and links to each provider's usage page.
 
+| Light | Dark |
+| --- | --- |
+| ![AI Meter panel in light mode](docs/panel-light.png) | ![AI Meter panel in dark mode](docs/panel-dark.png) |
+
 ```sh
 ./build_app.sh            # builds "build/AI Meter.app"
 ./build_app.sh --install  # copies it to ~/Applications and launches it

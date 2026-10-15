@@ -1,0 +1,57 @@
+.ai-meter-section {
+    width: 290px;
+    spacing: 14px;
+    padding: 8px 16px;
+}
+
+.ai-meter-footer {
+    padding: 4px 16px 8px;
+}
+
+.ai-meter-header {
+    spacing: 8px;
+}
+
+.ai-meter-provider {
+    font-weight: bold;
+    font-size: 1.05em;
+}
+
+.ai-meter-plan {
+    font-size: 0.85em;
+    border-radius: 12px;
+    background-color: rgba(128, 128, 128, 0.16);
+    padding: 2px 8px;
+}
+
+.ai-meter-link {
+    border-radius: 6px;
+    padding: 4px;
+}
+
+.ai-meter-link:hover, .ai-meter-link:focus {
+    background-color: rgba(128, 128, 128, 0.25);
+}
+
+.ai-meter-window {
+    spacing: 6px;
+}
+
+.ai-meter-percent {
+    font-weight: bold;
+    font-feature-settings: "tnum";
+}
+
+.ai-meter-bar {
+    height: 6px;
+    margin: 2px 0;
+}
+
+.ai-meter-muted {
+    font-size: 0.85em;
+}
+
+.ai-meter-error {
+    font-size: 0.9em;
+    color: #e5a550;
+}

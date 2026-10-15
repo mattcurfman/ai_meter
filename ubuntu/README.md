@@ -1,33 +1,76 @@
 # AI Meter for Ubuntu 24.04
 
-A top bar indicator that shows Claude and Codex plan usage at a glance
-(`C 8%  X 21%`, percent **used** of each provider's tightest limit). Click it
-to see every limit and when it resets.
+A native GNOME Shell 46 extension that shows Claude and Codex plan usage in the
+top bar. It uses JavaScript, GJS, St, Gio, and libsoup. It does not use Python,
+GTK, AppIndicator, Node.js, or a background service.
 
-![AI Meter menu with the Yaru theme](docs/menu-light.png)
-![AI Meter menu with the Yaru dark theme](docs/menu-dark.png)
+Click `C 5%  X 21%` to open the usage panel. The bars are blue below 70%, orange
+from 70%, and red from 90%. Each row shows the percentage used and the reset time.
+The top bar shows the highest percentage for each provider.
 
-These show the menu drawn by GTK with Ubuntu's Yaru themes. In the top bar, GNOME
-Shell draws the same items in its own menu style.
+![Native GNOME Shell usage panel](docs/native-popup.png)
+
+## Install
+
+From this directory, run:
 
 ```sh
-./install.sh              # installs to ~/.local/share/ai-meter and starts it
-./install.sh --autostart  # same, and starts it at login
-./uninstall.sh
-ai-meter --once           # print usage in the terminal
+./install.sh
 ```
 
-It uses the AppIndicator support that Ubuntu's GNOME desktop enables by default.
-`install.sh` installs `python3-gi`, `gir1.2-gtk-3.0` and
-`gir1.2-ayatanaappindicator3-0.1` with `sudo apt` if they're missing.
+The installer copies the extension to
+`~/.local/share/gnome-shell/extensions/ai-meter@ai-meter.local` and tries to enable
+it. On the first installation, log out and back in if GNOME does not detect it.
+Then run:
 
-## Where the numbers come from
+```sh
+gnome-extensions enable ai-meter@ai-meter.local
+```
 
-- **Claude**: the OAuth token Claude Code keeps in `~/.claude/.credentials.json`
-  (or `$CLAUDE_CONFIG_DIR`), sent to `api.anthropic.com/api/oauth/usage`.
-- **Codex**: the ChatGPT token in `~/.codex/auth.json` (or `$CODEX_HOME`), sent
-  to `chatgpt.com/backend-api/wham/usage`.
+Enabled extensions start at login. To stop AI Meter, disable it:
 
-AI Meter only reads these credentials; it never refreshes or writes them. If a
-token expires, running `claude` or `codex` once refreshes it. Both endpoints are
-undocumented, so AI Meter refreshes only every 5 minutes.
+```sh
+gnome-extensions disable ai-meter@ai-meter.local
+```
+
+To remove it, run `./uninstall.sh`. After an update, log out and back in to load
+the new JavaScript code. The installer removes the old Python indicator, launcher,
+and autostart entry. It does not remove system packages or CLI credentials.
+
+## Credentials and requests
+
+- **Claude:** reads `~/.claude/.credentials.json`, or the directory set by
+  `CLAUDE_CONFIG_DIR`. It sends the saved subscription access token to
+  `https://api.anthropic.com/api/oauth/usage` through libsoup.
+- **Codex:** starts `codex app-server`, asks it to refresh its credentials with
+  `account/read`, then requests `account/rateLimits/read`. It closes the process
+  after each check. Codex must support app-server and use a ChatGPT account.
+  The extension finds `codex` in `PATH`, then checks `~/.local/bin/codex`.
+
+The extension never writes credentials itself. Codex manages its own token
+refresh. Claude still needs a usable saved access token. A working CLI session
+does not mean that this file contains one. An HTTP 403 response means that the
+usage API denied access; it does not mean that the CLI login expired.
+
+`CLAUDE_CONFIG_DIR`, `CODEX_HOME`, and `PATH` come from the GNOME Shell session.
+Variables set only in a terminal are not available to the extension. If you use
+custom paths, set them in your desktop login environment and log in again.
+
+Both providers refresh every five minutes. Requests are asynchronous and have
+timeouts. A failed request keeps the last successful usage, marks it as saved,
+and adds `!` to the top-bar label. Disabling the extension cancels requests,
+stops the Codex child process, and removes the timers and panel.
+
+## Check and test
+
+Run from this directory. These commands use the system GJS runtime, not Python
+or Node.js:
+
+```sh
+gjs -m tests/usage.test.js  # Offline tests with a local Codex protocol fixture
+gjs -m check-usage.js      # Live usage check with your current credentials
+bash -n install.sh uninstall.sh
+```
+
+The live check prints usage values only; it does not print tokens. The extension
+is tested on GNOME Shell 46. Other Shell versions are not yet declared supported.

@@ -1,0 +1,7 @@
+{
+  "uuid": "ai-meter@ai-meter.local",
+  "name": "AI Meter",
+  "description": "Claude and Codex plan usage with blue progress bars in the top bar.",
+  "shell-version": ["46"],
+  "version": 1
+}

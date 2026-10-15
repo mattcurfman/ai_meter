@@ -1,46 +1,38 @@
 #!/usr/bin/env bash
-# Installs AI Meter for the current user and starts it. Pass --autostart to also start it at login.
+# Install the native extension for the current user.
 set -euo pipefail
 cd "$(dirname "$0")"
 
-PACKAGES=(python3-gi gir1.2-gtk-3.0 gir1.2-ayatanaappindicator3-0.1)
-missing=()
-for package in "${PACKAGES[@]}"; do
-  dpkg -s "$package" >/dev/null 2>&1 || missing+=("$package")
-done
-if ((${#missing[@]})); then
-  echo "Installing ${missing[*]} (needs sudo)…"
-  sudo apt-get install -y "${missing[@]}"
+if [[ "$(gnome-shell --version)" != "GNOME Shell 46."* ]]; then
+  echo "This extension supports GNOME Shell 46 (Ubuntu 24.04)." >&2
+  exit 1
 fi
 
 DATA="${XDG_DATA_HOME:-$HOME/.local/share}"
-DEST="$DATA/ai-meter"
-BIN="$HOME/.local/bin/ai-meter"
+UUID="ai-meter@ai-meter.local"
+DEST="$DATA/gnome-shell/extensions/$UUID"
 
-mkdir -p "$DEST/icons" "$HOME/.local/bin" "$DATA/applications" "$DATA/icons/hicolor/scalable/apps"
-install -m 755 ai_meter.py "$DEST/ai_meter.py"
-install -m 644 icons/ai-meter-symbolic.svg "$DEST/icons/"
-install -m 644 icons/ai-meter-symbolic.svg "$DATA/icons/hicolor/scalable/apps/"
-ln -sf "$DEST/ai_meter.py" "$BIN"
+# Stop only the old indicator owned by this user.
+for proc in /proc/[0-9]*; do
+  [[ -O "$proc" && -r "$proc/cmdline" ]] || continue
+  mapfile -d '' -t args < "$proc/cmdline" || continue
+  if [[ "${args[1]:-}" == "$DATA/ai-meter/ai_meter.py" || "${args[1]:-}" == "$HOME/.local/bin/ai-meter" ]]; then
+    kill "${proc##*/}" 2>/dev/null || true
+  fi
+done
+rm -rf "$DATA/ai-meter"
+rm -f "$HOME/.local/bin/ai-meter" "$DATA/applications/ai-meter.desktop" \
+  "$DATA/icons/hicolor/scalable/apps/ai-meter-symbolic.svg" \
+  "${XDG_CONFIG_HOME:-$HOME/.config}/autostart/ai-meter.desktop"
 
-cat > "$DEST/ai-meter.desktop" <<DESKTOP
-[Desktop Entry]
-Type=Application
-Name=AI Meter
-Comment=Claude and Codex plan usage in the top bar
-Exec=$BIN
-Icon=ai-meter-symbolic
-Categories=Utility;
-Terminal=false
-X-GNOME-Autostart-enabled=true
-DESKTOP
-install -m 644 "$DEST/ai-meter.desktop" "$DATA/applications/ai-meter.desktop"
+gnome-extensions disable "$UUID" 2>/dev/null || true
+mkdir -p "$DEST"
+install -m 644 metadata.json extension.js usage.js stylesheet.css "$DEST/"
 
-if [[ "${1:-}" == "--autostart" ]]; then
-  mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/autostart"
-  install -m 644 "$DEST/ai-meter.desktop" "${XDG_CONFIG_HOME:-$HOME/.config}/autostart/"
+if gnome-extensions enable "$UUID"; then
+  echo "AI Meter enabled. If this is an update, log out and back in to load the new code."
+else
+  echo "AI Meter installed. Log out and back in, then run:"
+  echo "  gnome-extensions enable $UUID"
 fi
-
-pkill -f "$DEST/ai_meter.py" 2>/dev/null || true
-nohup "$BIN" >/dev/null 2>&1 &
-echo "AI Meter installed to $DEST and started."
+echo "Enabled extensions start at login. No Python runtime or background service is needed."

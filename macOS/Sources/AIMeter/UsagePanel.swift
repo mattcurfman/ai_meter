@@ -63,6 +63,21 @@ private struct ProviderSection: View {
                     .foregroundStyle(.secondary)
             case .loaded(let usage):
                 ForEach(usage.windows) { WindowRow(window: $0) }
+                if usage.peakPercent == 100 {
+                    HStack(spacing: 8) {
+                        Text("🤵").font(.system(size: 30))
+                            .accessibilityLabel("Bartender")
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("You've been cut off").fontWeight(.semibold)
+                            Text("A usage limit is empty. Check its reset time.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(10)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+                }
             }
         }
     }
@@ -72,55 +87,28 @@ private struct WindowRow: View {
     let window: UsageWindow
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(window.title)
-                Spacer()
-                Text(window.percent / 100, format: .percent.precision(.fractionLength(0)))
-                    .monospacedDigit()
-                    .fontWeight(.medium)
-            }
-            .font(.callout)
+        HStack(spacing: 12) {
+            BeerGlass(remaining: 100 - window.percent)
+                .frame(width: 28, height: 40)
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(window.title)
+                    Spacer()
+                    Text("\((100 - window.percent) / 100, format: .percent.precision(.fractionLength(0))) left")
+                        .monospacedDigit()
+                        .fontWeight(.medium)
+                }
+                .font(.callout)
 
-            MeterBar(fraction: window.percent / 100, tint: tint)
-
-            if let resetsAt = window.resetsAt {
-                Text("Resets \(resetsAt, format: .relative(presentation: .named))")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .help(resetsAt.formatted(date: .abbreviated, time: .shortened))
+                if let resetsAt = window.resetsAt {
+                    Text("Resets \(resetsAt, format: .relative(presentation: .named))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .help(resetsAt.formatted(date: .abbreviated, time: .shortened))
+                }
             }
         }
         .accessibilityElement(children: .combine)
-    }
-
-    private var tint: Color {
-        switch window.percent {
-        case 90...: .red
-        case 70..<90: .orange
-        default: .accentColor
-        }
-    }
-}
-
-/// A capsule meter, drawn in SwiftUI rather than with `ProgressView` so the orange and
-/// red warning colors don't depend on how AppKit's bar treats `.tint`.
-private struct MeterBar: View {
-    let fraction: Double
-    let tint: Color
-
-    var body: some View {
-        GeometryReader { proxy in
-            Capsule()
-                .fill(.quaternary)
-                .overlay(alignment: .leading) {
-                    Capsule()
-                        .fill(tint)
-                        .frame(width: max(proxy.size.width * min(max(fraction, 0), 1), fraction > 0 ? 6 : 0))
-                }
-        }
-        .frame(height: 6)
-        .accessibilityHidden(true)
     }
 }
 

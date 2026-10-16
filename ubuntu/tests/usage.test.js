@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Matt Curfman and AI Meter contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import Soup from 'gi://Soup?version=3.0';
@@ -35,6 +38,7 @@ GLib.file_set_contents(executable, `#!/bin/sh\nexec /usr/bin/gjs -m ${GLib.shell
 Gio.File.new_for_path(executable).set_attribute_uint32('unix::mode', 0o700, Gio.FileQueryInfoFlags.NONE, null);
 GLib.setenv('PATH', temporary, true);
 GLib.setenv('CLAUDE_CONFIG_DIR', temporary, true);
+GLib.setenv('AI_METER_TEST_FINISHED', `${temporary}/finished`, true);
 const session = new Soup.Session({timeout: 1});
 try {
     GLib.file_set_contents(`${temporary}/.credentials.json`, JSON.stringify({claudeAiOauth: {accessToken: ''}}));
@@ -43,7 +47,9 @@ try {
     const usage = await fetchCodex(new Gio.Cancellable());
     equal(usage.plan, 'pro');
     equal(usage.windows[0], {title: 'Weekly', percent: 21, resetsAt: 1792542244000});
-    print('PASS: Codex handshake, refresh, notifications, and usage');
+    equal(GLib.file_test(`${temporary}/finished`, GLib.FileTest.EXISTS), true);
+    print('PASS: Codex handshake without forced refresh, notifications, and usage');
+    print('PASS: Codex exits normally after input closes');
     for (const [mode, message] of [['signed-out', 'no account'], ['api-key', 'API key']]) {
         GLib.setenv('AI_METER_TEST_CASE', mode, true);
         await rejects(() => fetchCodex(new Gio.Cancellable()), message);
@@ -59,7 +65,10 @@ try {
     print('PASS: cancellation stops a pending Codex request');
 } finally {
     session.abort();
-    for (const name of ['codex', '.credentials.json'])
-        Gio.File.new_for_path(`${temporary}/${name}`).delete(null);
+    for (const name of ['codex', '.credentials.json', 'finished']) {
+        const file = Gio.File.new_for_path(`${temporary}/${name}`);
+        if (file.query_exists(null))
+            file.delete(null);
+    }
     Gio.File.new_for_path(temporary).delete(null);
 }

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Matt Curfman and AI Meter contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import Foundation
 
 /// One rate-limit window, such as Claude's 5-hour session or Codex's weekly limit.
@@ -7,6 +10,12 @@ struct UsageWindow: Identifiable, Sendable, Equatable {
     /// Percent used, 0...100.
     let percent: Double
     let resetsAt: Date?
+
+    init(title: String, percent: Double, resetsAt: Date?) {
+        self.title = title
+        self.percent = percent.isFinite ? min(100, max(0, percent)) : 0
+        self.resetsAt = resetsAt
+    }
 }
 
 struct ProviderUsage: Sendable, Equatable {

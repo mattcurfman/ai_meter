@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Matt Curfman and AI Meter contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import Soup from 'gi://Soup?version=3.0';
@@ -170,7 +173,7 @@ export async function fetchCodex(parentCancellable) {
         };
         await request(1, 'initialize', {clientInfo: {name: 'ai_meter', title: 'AI Meter', version: '1.0'}});
         await send({method: 'initialized'});
-        const {account} = await request(2, 'account/read', {refreshToken: true});
+        const {account} = await request(2, 'account/read', {refreshToken: false});
         if (!account)
             throw new Error('Codex CLI has no account. Run codex login.');
         if (account.type === 'apiKey')
@@ -187,7 +190,13 @@ export async function fetchCodex(parentCancellable) {
         if (connection)
             parentCancellable.disconnect(connection);
         if (process) {
-            process.force_exit();
+            process.get_stdin_pipe().close(null);
+            let shutdownExpired = false;
+            const shutdownTimer = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 5, () => {
+                shutdownExpired = true;
+                process.force_exit();
+                return GLib.SOURCE_REMOVE;
+            });
             await new Promise(resolve => process.wait_async(null, (source, result) => {
                 try {
                     source.wait_finish(result);
@@ -195,7 +204,8 @@ export async function fetchCodex(parentCancellable) {
                     resolve();
                 }
             }));
-            process.get_stdin_pipe().close(null);
+            if (!shutdownExpired)
+                GLib.source_remove(shutdownTimer);
             process.get_stdout_pipe().close(null);
         }
     }

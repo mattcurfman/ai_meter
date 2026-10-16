@@ -34,16 +34,19 @@ gnome-extensions disable ai-meter@ai-meter.local
 ```
 
 To remove it, run `./uninstall.sh`. After an update, log out and back in to load
-the new JavaScript code. The installer removes the old Python indicator, launcher,
-and autostart entry. It does not remove system packages or CLI credentials.
+the new JavaScript code. The installer does not remove the old Python indicator
+or its files. If you used that version, stop it and remove its autostart entry
+through your desktop settings before enabling the extension. Inspect legacy
+files before deleting them. The installer does not remove system packages or
+CLI credentials. It installs LICENSE and NOTICE with the extension.
 
 ## Credentials and requests
 
 - **Claude:** reads `~/.claude/.credentials.json`, or the directory set by
   `CLAUDE_CONFIG_DIR`. It sends the saved subscription access token to
   `https://api.anthropic.com/api/oauth/usage` through libsoup.
-- **Codex:** starts `codex app-server`, asks it to refresh its credentials with
-  `account/read`, then requests `account/rateLimits/read`. It closes the process
+- **Codex:** starts `codex app-server`, reads the account without forcing token
+  refresh, then requests `account/rateLimits/read`. It closes the process
   after each check. Codex must support app-server and use a ChatGPT account.
   The extension finds `codex` in `PATH`, then checks `~/.local/bin/codex`.
 
@@ -60,6 +63,10 @@ Both providers refresh every five minutes. Requests are asynchronous and have
 timeouts. A failed request keeps the last successful usage, marks it as saved,
 and adds `!` to the top-bar label. Disabling the extension cancels requests,
 stops the Codex child process, and removes the timers and panel.
+Cleanup closes the child's input and gives it five seconds to exit before
+forcing it to stop. The CLI can still refresh tokens when they expire and can
+write its own state. Use a current Codex version; check compatibility with the
+live command below. Offline fixture tests alone do not establish compatibility.
 
 ## Check and test
 
@@ -68,9 +75,15 @@ or Node.js:
 
 ```sh
 gjs -m tests/usage.test.js  # Offline tests with a local Codex protocol fixture
+bash tests/install.test.sh # Installer checks in a temporary home directory
 gjs -m check-usage.js      # Live usage check with your current credentials
 bash -n install.sh uninstall.sh
 ```
 
 The live check prints usage values only; it does not print tokens. The extension
 is tested on GNOME Shell 46. Other Shell versions are not yet declared supported.
+The live check exits with status 1 if either provider fails.
+
+Read the [security policy](../SECURITY.md), [disclaimers](../DISCLAIMER.md), and
+[release checks](../RELEASING.md). This project is licensed under
+[Apache-2.0](../LICENSE).

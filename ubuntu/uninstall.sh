@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2026 Matt Curfman and AI Meter contributors
+# SPDX-License-Identifier: Apache-2.0
 # Disable and remove the native extension.
 set -euo pipefail
 DATA="${XDG_DATA_HOME:-$HOME/.local/share}"

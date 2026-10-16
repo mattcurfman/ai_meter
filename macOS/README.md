@@ -15,6 +15,10 @@ when it resets, and links to each provider's usage page.
 
 Turn on **Open at Login** from the ••• menu in the panel.
 
+Builds require a Swift 6 toolchain and macOS 14 or later. The script creates
+an ad-hoc-signed app, not a notarized release. LICENSE and NOTICE are included
+in the app bundle. See the [release checks](../RELEASING.md) before distribution.
+
 ## Where the numbers come from
 
 - **Claude**: the OAuth token that Claude Code keeps in the login keychain
@@ -23,6 +27,12 @@ Turn on **Open at Login** from the ••• menu in the panel.
   sent to `chatgpt.com/backend-api/wham/usage`.
 
 AI Meter only reads these credentials; it never refreshes or writes them. If a
-token expires, running `claude` or `codex` once refreshes it. Both endpoints are
+token expires, use the provider CLI to sign in or refresh it. Both endpoints are
 undocumented, so AI Meter refreshes only every 5 minutes (opening the panel
 shows the last fetched numbers).
+
+A failed check replaces the previous result with an error. The footer shows
+the last check time, not the time of the last successful response.
+
+Read the [security policy](../SECURITY.md) and [disclaimers](../DISCLAIMER.md).
+This project is licensed under [Apache-2.0](../LICENSE).

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Matt Curfman and AI Meter contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import ServiceManagement
 import SwiftUI
 
@@ -129,7 +132,7 @@ private struct Footer: View {
         HStack {
             if let lastUpdated = store.lastUpdated {
                 TimelineView(.periodic(from: .now, by: 30)) { _ in
-                    Text("Updated \(lastUpdated, format: .relative(presentation: .named))")
+                    Text("Checked \(lastUpdated, format: .relative(presentation: .named))")
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Matt Curfman and AI Meter contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
@@ -14,8 +17,8 @@ function reply(message, result) {
 reply(read('initialize'), {});
 read('initialized');
 const account = read('account/read');
-if (!account.params.refreshToken)
-    throw new Error('Token refresh must be requested.');
+if (account.params.refreshToken !== false)
+    throw new Error('Token refresh must not be forced.');
 const mode = GLib.getenv('AI_METER_TEST_CASE');
 if (mode === 'cancel')
     new GLib.MainLoop(null, false).run();
@@ -27,3 +30,6 @@ reply(limits, {rateLimits: {
     primary: {usedPercent: 21, windowDurationMins: 10080, resetsAt: 1792542244},
     secondary: null,
 }});
+if (input.read_line_utf8(null)[0] !== null)
+    throw new Error('Expected input to close after the usage response.');
+GLib.file_set_contents(GLib.getenv('AI_METER_TEST_FINISHED'), 'finished');

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Matt Curfman and AI Meter contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import Foundation
 
 /// Reads Codex plan usage with the ChatGPT token that the Codex CLI stores in ~/.codex/auth.json.

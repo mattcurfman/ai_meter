@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-FileCopyrightText: 2026 Matt Curfman and AI Meter contributors
+     SPDX-License-Identifier: Apache-2.0 -->
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
@@ -11,6 +13,6 @@
     <key>CFBundleVersion</key><string>1</string>
     <key>LSMinimumSystemVersion</key><string>14.0</string>
     <key>LSUIElement</key><true/>
-    <key>NSHumanReadableCopyright</key><string>Usage data comes from your local Claude Code and Codex sign-ins.</string>
+    <key>NSHumanReadableCopyright</key><string>Copyright 2026 Matt Curfman and AI Meter contributors. Apache-2.0.</string>
 </dict>
 </plist>

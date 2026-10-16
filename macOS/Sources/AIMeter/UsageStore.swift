@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Matt Curfman and AI Meter contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import Foundation
 import Observation
 
@@ -27,8 +30,8 @@ final class UsageStore {
         async let claudeResult = Self.capture { try await self.claude.fetch() }
         async let codexResult = Self.capture { try await self.codex.fetch() }
         let (claudeState, codexState) = await (claudeResult, codexResult)
-        states[.claude] = merged(claudeState, previous: states[.claude])
-        states[.codex] = merged(codexState, previous: states[.codex])
+        states[.claude] = claudeState
+        states[.codex] = codexState
         lastUpdated = Date()
     }
 
@@ -36,14 +39,5 @@ final class UsageStore {
 
     private nonisolated static func capture(_ work: @Sendable () async throws -> ProviderUsage) async -> ProviderState {
         do { return .loaded(try await work()) } catch { return .failed(error.localizedDescription) }
-    }
-
-    /// A transient network failure shouldn't wipe out the last good numbers.
-    private func merged(_ new: ProviderState, previous: ProviderState?) -> ProviderState {
-        if case .failed = new, let previous, previous.usage != nil,
-           let lastUpdated, Date().timeIntervalSince(lastUpdated) < 3600 {
-            return previous
-        }
-        return new
     }
 }

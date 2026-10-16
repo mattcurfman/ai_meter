@@ -38,6 +38,10 @@
 }
 
 .ai-meter-window {
+    spacing: 12px;
+}
+
+.ai-meter-window-details {
     spacing: 6px;
 }
 
@@ -46,9 +50,29 @@
     font-feature-settings: "tnum";
 }
 
-.ai-meter-bar {
-    height: 6px;
-    margin: 2px 0;
+.ai-meter-summary {
+    spacing: 6px;
+}
+
+.ai-meter-panel-glass {
+    width: 12px;
+    height: 17px;
+}
+
+.ai-meter-glass {
+    width: 28px;
+    height: 40px;
+}
+
+.ai-meter-cutoff {
+    spacing: 8px;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: rgba(128, 128, 128, 0.16);
+}
+
+.ai-meter-bartender {
+    font-size: 30px;
 }
 
 .ai-meter-muted {

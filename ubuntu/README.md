@@ -4,9 +4,12 @@ A native GNOME Shell 46 extension that shows Claude and Codex plan usage in the
 top bar. It uses JavaScript, GJS, St, Gio, and libsoup. It does not use Python,
 GTK, AppIndicator, Node.js, or a background service.
 
-Click `C 5%  X 21%` to open the usage panel. The bars are blue below 70%, orange
-from 70%, and red from 90%. Each row shows the percentage used and the reset time.
-The top bar shows the highest percentage for each provider.
+Click the top-bar glasses to open the usage panel. Each beer glass empties as
+usage increases. Each row shows the percentage left and the reset time.
+The top bar shows the lowest remaining allowance for each provider.
+When any window is fully used, a bartender says "You've been cut off".
+Unknown usage shows a dash, not an empty glass. Failed checks keep the saved
+usage and error warning, but do not show a new cutoff message.
 
 ![Native GNOME Shell usage panel](docs/native-popup.png)
 

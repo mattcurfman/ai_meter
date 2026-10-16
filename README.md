@@ -11,8 +11,13 @@ show the percent **used** of each provider's tightest limit, and refresh every
 
 ## Screenshots
 
-- macOS: [light panel](macOS/docs/panel-light.png) and [dark panel](macOS/docs/panel-dark.png).
-- Ubuntu: [native GNOME Shell panel](ubuntu/docs/native-popup.png).
+### macOS
+
+![AI Meter macOS panel in dark mode](macOS/docs/panel-dark.png)
+
+### Ubuntu
+
+![AI Meter GNOME Shell panel in dark mode](ubuntu/docs/native-popup.png)
 
 ## Install and use
 

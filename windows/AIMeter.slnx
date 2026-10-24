@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="AIMeter/AIMeter.csproj" />
+  <Project Path="AIMeter.Tests/AIMeter.Tests.csproj" />
+</Solution>

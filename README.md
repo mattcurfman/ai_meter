@@ -4,8 +4,9 @@ Claude and Codex plan usage at a glance, in the menu bar or top bar.
 
 - [`macOS/`](macOS/): SwiftUI menu bar app (macOS 14+).
 - [`ubuntu/`](ubuntu/): native GNOME Shell extension for Ubuntu 24.04, with no Python dependency.
+- [`windows/`](windows/): C# WPF notification-area app for Windows 11.
 
-Both read the sign-ins that Claude Code and the Codex CLI already store locally,
+The apps read the sign-ins that Claude Code and the Codex CLI already store locally,
 show the percent **used** of each provider's tightest limit, and refresh every
 5 minutes.
 
@@ -19,11 +20,17 @@ show the percent **used** of each provider's tightest limit, and refresh every
 
 ![AI Meter GNOME Shell panel in dark mode](ubuntu/docs/native-popup.png)
 
+### Windows
+
+![AI Meter Windows normal meters with sample usage](windows/docs/panel-dark.png)
+
 ## Install and use
 
-Follow the [macOS guide](macOS/README.md) or the [Ubuntu guide](ubuntu/README.md).
+Follow the [macOS guide](macOS/README.md), [Ubuntu guide](ubuntu/README.md), or
+[Windows guide](windows/README.md).
 macOS builds need Swift 6 and macOS 14 or later. Ubuntu needs GNOME Shell 46,
-GJS, and libsoup 3. Sign in with the provider CLIs before use.
+GJS, and libsoup 3. Windows builds use Visual Studio 2026 Community and .NET 10.
+Sign in with the provider CLIs before use.
 
 This is an experimental, independent project. It is not affiliated with or
 endorsed by Anthropic, OpenAI, Apple, Canonical, or GNOME. Provider interfaces
@@ -31,7 +38,7 @@ can change without notice. Use the provider's own page to confirm usage.
 
 ## Security and privacy
 
-AI Meter reads local credentials and uses them to request usage data. On Ubuntu,
+AI Meter reads local credentials and uses them to request usage data. On Ubuntu and Windows,
 it also runs the installed Codex CLI, which can refresh credentials and write
 its own state. AI Meter has no telemetry code; the CLI and provider services
 have their own settings and policies.

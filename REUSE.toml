@@ -3,7 +3,7 @@
 version = 1
 
 [[annotations]]
-path = ["*.md", "macOS/README.md", "ubuntu/README.md", "NOTICE", ".gitignore", "macOS/docs/*.png", "ubuntu/docs/*.png"]
+path = ["*.md", "macOS/README.md", "ubuntu/README.md", "windows/README.md", "windows/AIMeter.slnx", "windows/docs/*.png", "NOTICE", ".gitignore", "macOS/docs/*.png", "ubuntu/docs/*.png"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Matt Curfman and AI Meter contributors"
 SPDX-License-Identifier = "Apache-2.0"

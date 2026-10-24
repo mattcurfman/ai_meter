@@ -74,11 +74,24 @@ or a managed-device restriction. Do not disable Gatekeeper globally.
 
 AI Meter only reads these credentials; it never refreshes or writes them. If a
 token expires, use the provider CLI to sign in or refresh it. Both endpoints are
-undocumented, so AI Meter refreshes only every 5 minutes (opening the panel
-shows the last fetched numbers).
+undocumented, so AI Meter waits five minutes after a successful request before
+it checks again. Opening the panel does not send a request.
+
+After a failure, each provider waits independently before it tries again. The
+random delay grows from 5–10 minutes to 10–20, 20–40, then 30–60 minutes for
+further failures. Claude's `Retry-After` header can require a longer delay.
+The scheduler checks once per minute after the current requests finish.
+A successful request restores the five-minute interval. Restarting the app
+clears the retry state.
 
 A failed check replaces the previous result with an error. The footer shows
 the last check time, not the time of the last successful response.
+
+## Test retry delays
+
+Run `swift test` from this directory. The tests check delay growth, jitter,
+the delay cap, reset after success, and `Retry-After` seconds and dates.
+They do not send network requests.
 
 Read the [security policy](../SECURITY.md) and [disclaimers](../DISCLAIMER.md).
 This project is licensed under [Apache-2.0](../LICENSE).

@@ -12,7 +12,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
-import {PROVIDERS, fetchClaude, fetchCodex, peak, relative} from './usage.js';
+import {PROVIDERS, RefreshSchedule, fetchClaude, fetchCodex, peak, relative} from './usage.js';
 
 function label(text, styleClass = '') {
     return new St.Label({
@@ -71,7 +71,9 @@ export default class AIMeterExtension extends Extension {
     enable() {
         this._cancellable = new Gio.Cancellable();
         this._session = new Soup.Session({timeout: 20});
-        this._providers = PROVIDERS.map(provider => ({...provider, usage: null, error: null}));
+        this._providers = PROVIDERS.map(provider => ({
+            ...provider, usage: null, error: null, schedule: new RefreshSchedule(),
+        }));
         this._button = new PanelMenu.Button(0.0, 'AI Meter');
         this._summary = new St.BoxLayout({style_class: 'ai-meter-summary'});
         this._button.add_child(this._summary);
@@ -82,7 +84,7 @@ export default class AIMeterExtension extends Extension {
         });
         this._render();
         this._refresh();
-        this._refreshTimer = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 300, () => {
+        this._refreshTimer = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 60, () => {
             this._refresh();
             return GLib.SOURCE_CONTINUE;
         });
@@ -96,19 +98,25 @@ export default class AIMeterExtension extends Extension {
     async _refresh() {
         if (this._busy)
             return;
+        const due = this._providers.filter(provider => provider.schedule.isDue());
+        if (!due.length)
+            return;
         this._busy = true;
         const cancellable = this._cancellable;
         const session = this._session;
-        await Promise.all(this._providers.map(async provider => {
+        await Promise.all(due.map(async provider => {
             try {
                 const usage = await (provider.name === 'Claude' ? fetchClaude(session, cancellable) : fetchCodex(cancellable));
                 if (!cancellable.is_cancelled()) {
                     provider.usage = usage;
                     provider.error = null;
+                    provider.schedule.succeeded();
                 }
             } catch (error) {
-                if (!cancellable.is_cancelled())
+                if (!cancellable.is_cancelled()) {
                     provider.error = error.message;
+                    provider.schedule.failed(error.retryAfterSeconds);
+                }
             }
         }));
         if (cancellable.is_cancelled())

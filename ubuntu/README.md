@@ -62,8 +62,16 @@ usage API denied access; it does not mean that the CLI login expired.
 Variables set only in a terminal are not available to the extension. If you use
 custom paths, set them in your desktop login environment and log in again.
 
-Both providers refresh every five minutes. Requests are asynchronous and have
-timeouts. A failed request keeps the last successful usage, marks it as saved,
+Each provider is checked immediately on enable, then waits five minutes after
+a successful check. Failures back off independently with an equal-jitter random
+delay: 5–10 minutes, then 10–20, then 20–40, then 30–60 minutes for every further
+failure. A success resets that provider's backoff. Claude's `Retry-After` header
+(seconds or HTTP date) is a minimum wait, even when it exceeds one hour.
+Deadlines use a monotonic clock and are checked every 60 seconds, so requests
+can start up to about a minute after their deadline. Idle checks do not change
+the displayed checked time. Schedules reset when the extension is re-enabled.
+Requests are asynchronous and have timeouts.
+A failed request keeps the last successful usage, marks it as saved,
 and adds `!` to the top-bar label. Disabling the extension cancels requests,
 stops the Codex child process, and removes the timers and panel.
 Cleanup closes the child's input and gives it five seconds to exit before
@@ -78,6 +86,7 @@ or Node.js:
 
 ```sh
 gjs -m tests/usage.test.js  # Offline tests with a local Codex protocol fixture
+gjs -m tests/backoff.test.js # Offline scheduling and mocked Claude HTTP tests
 bash tests/install.test.sh # Installer checks in a temporary home directory
 gjs -m check-usage.js      # Live usage check with your current credentials
 bash -n install.sh uninstall.sh

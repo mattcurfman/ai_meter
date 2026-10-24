@@ -65,6 +65,42 @@ enum ProviderState: Sendable, Equatable {
 
 struct UsageError: LocalizedError {
     let message: String
-    init(_ message: String) { self.message = message }
+    let retryAfter: TimeInterval
+    init(_ message: String, retryAfter: TimeInterval = 0) {
+        self.message = message
+        self.retryAfter = retryAfter
+    }
     var errorDescription: String? { message }
+}
+
+struct RetrySchedule {
+    private(set) var nextAttempt: TimeInterval = 0
+    private var failures = 0
+
+    func ready(_ now: TimeInterval) -> Bool { now >= nextAttempt }
+
+    mutating func success(_ now: TimeInterval) {
+        failures = 0
+        nextAttempt = now + 300
+    }
+
+    mutating func fail(_ now: TimeInterval, retryAfter: TimeInterval = 0,
+                       random: Double = Double.random(in: 0..<1)) {
+        failures = min(failures + 1, 5)
+        let maximum = min(300 * pow(2, Double(failures)), 3600)
+        nextAttempt = now + max(maximum / 2 + random * maximum / 2, retryAfter)
+    }
+
+    static func retryAfter(_ header: String?, now: Date = Date()) -> TimeInterval {
+        guard let header else { return 0 }
+        if let seconds = Double(header), seconds.isFinite {
+            return max(0, seconds)
+        }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        formatter.dateFormat = "EEE, dd MMM yyyy HH:mm:ss zzz"
+        guard let date = formatter.date(from: header) else { return 0 }
+        return max(0, date.timeIntervalSince(now))
+    }
 }

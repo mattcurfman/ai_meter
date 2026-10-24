@@ -17,7 +17,10 @@ struct ClaudeUsageClient: Sendable {
         if status == 401 {
             throw UsageError("Sign-in expired. Run `claude` once to refresh it.")
         }
-        guard status == 200 else { throw UsageError("Claude returned HTTP \(status).") }
+        guard status == 200 else {
+            let header = (response as? HTTPURLResponse)?.value(forHTTPHeaderField: "Retry-After")
+            throw UsageError("Claude returned HTTP \(status).", retryAfter: RetrySchedule.retryAfter(header))
+        }
 
         let body = try JSONDecoder.usage.decode(Response.self, from: data)
         let windows: [UsageWindow] = [

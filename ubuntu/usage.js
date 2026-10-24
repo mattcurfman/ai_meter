@@ -10,6 +10,48 @@ export const PROVIDERS = [
     {name: 'Codex', initial: 'X', dashboard: 'https://chatgpt.com/codex/settings/usage'},
 ];
 
+// All schedule deadlines use monotonic seconds, never wall-clock dates.
+export class RefreshSchedule {
+    constructor(clock = () => GLib.get_monotonic_time() / 1000000, random = Math.random) {
+        this._clock = clock;
+        this._random = random;
+        this._failures = 0;
+        this._next = 0;
+    }
+
+    isDue() {
+        return this._clock() >= this._next;
+    }
+
+    succeeded() {
+        this._failures = 0;
+        this._next = this._clock() + 300;
+    }
+
+    failed(retryAfterSeconds = 0) {
+        this._failures = Math.min(this._failures + 1, 4);
+        const ceiling = Math.min(600 * 2 ** (this._failures - 1), 3600);
+        const delay = ceiling / 2 * (1 + this._random());
+        const retryAfter = Number.isFinite(retryAfterSeconds) ? retryAfterSeconds : 0;
+        this._next = this._clock() + Math.max(delay, retryAfter);
+    }
+}
+
+function retryAfterSeconds(header) {
+    if (!header)
+        return 0;
+    const value = header.trim();
+    if (/^\d+$/.test(value)) {
+        const seconds = Number(value);
+        return Number.isFinite(seconds) ? seconds : 0;
+    }
+    // HTTP dates begin with a weekday; do not interpret malformed numbers as dates.
+    if (!/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/i.test(value))
+        return 0;
+    const timestamp = Date.parse(value);
+    return Number.isFinite(timestamp) ? Math.max(0, (timestamp - Date.now()) / 1000) : 0;
+}
+
 export function peak(usage) {
     return usage?.windows.length ? Math.max(...usage.windows.map(window => window.percent)) : null;
 }
@@ -108,8 +150,11 @@ export async function fetchClaude(session, cancellable) {
         throw new Error('Claude usage API rejected the saved token. Open Claude Code to refresh it.');
     if (message.status_code === 403)
         throw new Error('Claude usage API denied access (HTTP 403). CLI access can still work.');
-    if (message.status_code !== 200)
-        throw new Error(`Claude usage API returned HTTP ${message.status_code}.`);
+    if (message.status_code !== 200) {
+        const error = new Error(`Claude usage API returned HTTP ${message.status_code}.`);
+        error.retryAfterSeconds = retryAfterSeconds(message.response_headers.get_one('Retry-After'));
+        throw error;
+    }
     return parseClaude(JSON.parse(new TextDecoder().decode(bytes.get_data())), oauth.subscriptionType);
 }
 

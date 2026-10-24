@@ -8,6 +8,7 @@ let package = Package(
     name: "AIMeter",
     platforms: [.macOS(.v14)],
     targets: [
-        .executableTarget(name: "AIMeter", path: "Sources/AIMeter")
+        .executableTarget(name: "AIMeter", path: "Sources/AIMeter"),
+        .testTarget(name: "AIMeterTests", dependencies: ["AIMeter"])
     ]
 )

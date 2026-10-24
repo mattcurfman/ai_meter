@@ -1,11 +1,8 @@
 # AI Meter for macOS
 
-A menu bar app that shows the Claude and Codex allowance left with beer glasses.
-Each glass empties as usage increases. The menu bar shows each provider's
-tightest window. Click it to see a glass for every window, its remaining
-percentage, its reset time, and a link to the provider's usage page.
-When any window is fully used, a bartender says "You've been cut off".
-Unknown usage shows a dash or an error, not an empty glass.
+A menu bar app that shows Claude and Codex plan usage at a glance (`C 8%  X 0%`).
+The label shows each provider's tightest window; click it to see every window,
+when it resets, and links to each provider's usage page.
 
 | Light | Dark |
 | --- | --- |

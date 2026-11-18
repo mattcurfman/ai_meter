@@ -17,18 +17,36 @@ struct AIMeterApp: App {
     }
 }
 
-/// Compact status item, e.g. "C 8%  X 0%". Template-rendered so it follows the menu bar's appearance.
+/// Compact status item: each provider's logo followed by its percent, e.g. "[A] 8%  [OpenAI] 0%".
+/// A menu bar label shows only one image reliably, so the logos and text are drawn into one template image
+/// that follows the menu bar's appearance.
 struct MenuBarLabel: View {
     let store: UsageStore
 
     var body: some View {
-        Text(summary)
-            .monospacedDigit()
+        Image(nsImage: summaryImage)
             .accessibilityLabel(accessibilitySummary)
     }
 
-    private var summary: String {
-        Provider.allCases.map { "\($0.initial) \(percentText(for: $0))" }.joined(separator: "  ")
+    private var summaryImage: NSImage {
+        let font = NSFont.menuBarFont(ofSize: 0)
+        let renderer = ImageRenderer(content: HStack(spacing: 8) {
+            ForEach(Provider.allCases) { provider in
+                HStack(spacing: 3) {
+                    Image(nsImage: NSImage(data: Data(provider.logoSVG.utf8)) ?? NSImage())
+                        .resizable()
+                        .renderingMode(.template)
+                        .frame(width: font.pointSize - 1, height: font.pointSize - 1)
+                    Text(percentText(for: provider)).monospacedDigit()
+                }
+            }
+        }
+        .font(Font(font))
+        .foregroundStyle(.black))
+        renderer.scale = 2
+        let image = renderer.nsImage ?? NSImage()
+        image.isTemplate = true
+        return image
     }
 
     private var accessibilitySummary: String {

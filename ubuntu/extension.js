@@ -55,8 +55,17 @@ export default class AIMeterExtension extends Extension {
             ...provider, usage: null, error: null, schedule: new RefreshSchedule(),
         }));
         this._button = new PanelMenu.Button(0.0, 'AI Meter');
-        this._label = label('C –  X –');
-        this._button.add_child(this._label);
+        // Each provider shows its company logo, followed by its percent. Symbolic icons follow the panel color.
+        const summary = new St.BoxLayout({style_class: 'ai-meter-summary'});
+        for (const provider of this._providers) {
+            summary.add_child(new St.Icon({
+                gicon: Gio.icon_new_for_string(`${this.path}/icons/${provider.logo}-symbolic.svg`),
+                style_class: 'ai-meter-logo', y_align: Clutter.ActorAlign.CENTER,
+            }));
+            provider.label = label('–', 'ai-meter-summary-percent');
+            summary.add_child(provider.label);
+        }
+        this._button.add_child(summary);
         Main.panel.addToStatusArea(this.uuid, this._button);
         this._button.menu.connect('open-state-changed', (_menu, open) => {
             if (open)
@@ -107,10 +116,14 @@ export default class AIMeterExtension extends Extension {
     }
 
     _render() {
-        this._label.text = this._providers.map(provider => {
+        for (const provider of this._providers) {
             const value = peak(provider.usage);
-            return `${provider.initial} ${value === null ? '–' : `${Math.round(value)}%`}${provider.error ? ' !' : ''}`;
-        }).join('  ');
+            provider.label.text = `${value === null ? '–' : `${Math.round(value)}%`}${provider.error ? ' !' : ''}`;
+        }
+        this._button.accessible_name = this._providers.map(provider => {
+            const value = peak(provider.usage);
+            return `${provider.name} ${value === null ? 'unknown' : `${Math.round(value)}% used`}`;
+        }).join(', ');
         this._button.menu.removeAll();
         for (const [index, provider] of this._providers.entries()) {
             if (index)
@@ -171,6 +184,13 @@ export default class AIMeterExtension extends Extension {
         footer.box.add_style_class_name('ai-meter-footer');
         footer.box.add_child(label(this._updated ? `Checked ${this._updated.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}` : 'Checking usage…', 'ai-meter-muted'));
         this._button.menu.addMenuItem(footer);
+        const quit = new PopupMenu.PopupMenuItem('Quit AI Meter');
+        // Disable after the menu closes, because disable() destroys this menu.
+        quit.connect('activate', () => GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
+            Main.extensionManager.disableExtension(this.uuid);
+            return GLib.SOURCE_REMOVE;
+        }));
+        this._button.menu.addMenuItem(quit);
     }
 
     disable() {
@@ -180,7 +200,6 @@ export default class AIMeterExtension extends Extension {
         GLib.source_remove(this._clockTimer);
         this._button.destroy();
         this._button = null;
-        this._label = null;
         this._session = null;
         this._cancellable = null;
         this._providers = null;

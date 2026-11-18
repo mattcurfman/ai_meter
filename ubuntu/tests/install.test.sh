@@ -26,7 +26,7 @@ chmod +x "$TEMP/bin/gnome-shell" "$TEMP/bin/gnome-extensions"
 export PATH="$TEMP/bin:$PATH"
 bash "$ROOT/install.sh"
 DEST="$XDG_DATA_HOME/gnome-shell/extensions/ai-meter@ai-meter.local"
-for file in metadata.json metadata.json.license extension.js usage.js stylesheet.css LICENSE NOTICE; do
+for file in metadata.json metadata.json.license extension.js usage.js stylesheet.css LICENSE NOTICE icons/anthropic-symbolic.svg icons/openai-symbolic.svg; do
   test -s "$DEST/$file"
 done
 cmp "$ROOT/../LICENSE" "$DEST/LICENSE"

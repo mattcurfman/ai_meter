@@ -2,6 +2,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+.ai-meter-summary-percent {
+    margin: 0 10px 0 4px;
+    font-feature-settings: "tnum";
+}
+
+.ai-meter-summary-percent:last-child {
+    margin-right: 0;
+}
+
+.ai-meter-logo {
+    icon-size: 14px;
+}
+
 .ai-meter-section {
     width: 290px;
     spacing: 14px;

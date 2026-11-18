@@ -7,3 +7,9 @@ path = ["*.md", "macOS/README.md", "ubuntu/README.md", "windows/README.md", "win
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Matt Curfman and AI Meter contributors"
 SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = ["ubuntu/icons/*.svg"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Simple Icons contributors"
+SPDX-License-Identifier = "CC0-1.0"

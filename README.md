@@ -14,11 +14,13 @@ show the percent **used** of each provider's tightest limit, and refresh every
 
 ### macOS
 
+![AI Meter in the macOS menu bar, with the Anthropic and OpenAI logos before each percent](macOS/docs/menubar.png)
+
 ![AI Meter macOS panel in dark mode](macOS/docs/panel-dark.png)
 
 ### Ubuntu
 
-![AI Meter GNOME Shell panel in dark mode](ubuntu/docs/native-popup.png)
+![AI Meter in the GNOME Shell top bar with its panel open, with sample usage](ubuntu/docs/native-popup.png)
 
 ### Windows
 

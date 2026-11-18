@@ -4,11 +4,12 @@ A native GNOME Shell 46 extension that shows Claude and Codex plan usage in the
 top bar. It uses JavaScript, GJS, St, Gio, and libsoup. It does not use Python,
 GTK, AppIndicator, Node.js, or a background service.
 
-Click `C 5%  X 21%` to open the usage panel. The bars are blue below 70%, orange
+The top bar shows the Anthropic logo and the Claude percent, then the OpenAI
+logo and the Codex percent. Click it to open the usage panel. The bars are blue below 70%, orange
 from 70%, and red from 90%. Each row shows the percentage used and the reset time.
 The top bar shows the highest percentage for each provider.
 
-![Native GNOME Shell usage panel](docs/native-popup.png)
+![AI Meter in the GNOME Shell top bar with its panel open, with sample usage](docs/native-popup.png)
 
 ## Install
 
@@ -27,7 +28,10 @@ Then run:
 gnome-extensions enable ai-meter@ai-meter.local
 ```
 
-Enabled extensions start at login. To stop AI Meter, disable it:
+Enabled extensions start at login. To stop AI Meter, click **Quit AI Meter** at
+the bottom of the panel. This disables the extension, and it stays off after
+the next login. To start it again, run the `enable` command above or use the
+Extensions app. You can also disable it from a terminal:
 
 ```sh
 gnome-extensions disable ai-meter@ai-meter.local

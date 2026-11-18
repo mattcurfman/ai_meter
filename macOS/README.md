@@ -1,8 +1,12 @@
 # AI Meter for macOS
 
-A menu bar app that shows Claude and Codex plan usage at a glance (`C 8%  X 0%`).
+A menu bar app that shows Claude and Codex plan usage at a glance. The menu bar
+shows the Anthropic logo and the Claude percent, then the OpenAI logo and the
+Codex percent.
 The label shows each provider's tightest window; click it to see every window,
 when it resets, and links to each provider's usage page.
+
+![AI Meter in the menu bar, with the Anthropic and OpenAI logos before each percent](docs/menubar.png)
 
 | Light | Dark |
 | --- | --- |

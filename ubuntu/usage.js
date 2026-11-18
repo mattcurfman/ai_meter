@@ -6,8 +6,8 @@ import GLib from 'gi://GLib';
 import Soup from 'gi://Soup?version=3.0';
 
 export const PROVIDERS = [
-    {name: 'Claude', initial: 'C', dashboard: 'https://claude.ai/settings/usage'},
-    {name: 'Codex', initial: 'X', dashboard: 'https://chatgpt.com/codex/settings/usage'},
+    {name: 'Claude', logo: 'anthropic', dashboard: 'https://claude.ai/settings/usage'},
+    {name: 'Codex', logo: 'openai', dashboard: 'https://chatgpt.com/codex/settings/usage'},
 ];
 
 // All schedule deadlines use monotonic seconds, never wall-clock dates.

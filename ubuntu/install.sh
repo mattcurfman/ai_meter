@@ -18,6 +18,8 @@ gnome-extensions disable "$UUID" 2>/dev/null || true
 mkdir -p "$DEST"
 install -m 644 metadata.json metadata.json.license extension.js usage.js stylesheet.css "$DEST/"
 install -m 644 ../LICENSE ../NOTICE "$DEST/"
+install -d "$DEST/icons"
+install -m 644 icons/anthropic-symbolic.svg icons/openai-symbolic.svg "$DEST/icons/"
 
 if gnome-extensions enable "$UUID"; then
   echo "AI Meter enabled. If this is an update, log out and back in to load the new code."
